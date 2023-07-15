@@ -75,14 +75,14 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User delete(Long userId) {
+    public void delete(Long userId) {
         if (userId == null) {
             throw new ValidationException("Не передан userId");
         }
         if (!users.containsKey(userId)) {
             throw new UserNotFoundException("Пользователь с ID " + userId + " не найден!");
         }
-        return users.remove(userId);
+        users.remove(userId);
     }
 
     private boolean isValidUser(User user) {

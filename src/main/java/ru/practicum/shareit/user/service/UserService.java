@@ -45,8 +45,8 @@ public class UserService {
         return mapper.toUserDto(userStorage.update(mapper.toUser(userDto)));
     }
 
-    public UserDto delete(Long userId) {
+    public void delete(Long userId) {
         itemService.deleteItemsByOwnerId(userId);
-        return mapper.toUserDto(userStorage.delete(userId));
+        userStorage.delete(userId);
     }
 }

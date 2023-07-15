@@ -48,12 +48,12 @@ public class ItemService {
         return mapper.toItemDto(itemStorage.updateItem(mapper.toItem(itemDto, ownerId)));
     }
 
-    public ItemDto deleteItemById(Long itemId, Long ownerId) {
+    public void deleteItemById(Long itemId, Long ownerId) {
         Item item = itemStorage.getItemById(itemId);
         if (!item.getOwnerId().equals(ownerId)) {
             throw new ItemNotFoundException("У пользователя нет такой вещи!");
         }
-        return mapper.toItemDto(itemStorage.deleteItemById(itemId));
+        itemStorage.deleteItemById(itemId);
     }
 
     public void deleteItemsByOwnerId(Long ownerId) {

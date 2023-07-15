@@ -56,14 +56,14 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public Item deleteItemById(Long itemId) {
+    public void deleteItemById(Long itemId) {
         if (itemId == null) {
             throw new ValidationException("Передан пустой аргумент!");
         }
         if (!items.containsKey(itemId)) {
             throw new ItemNotFoundException("Вещь с ID=" + itemId + " не найден!");
         }
-        return items.remove(itemId);
+        items.remove(itemId);
     }
 
     @Override
@@ -74,11 +74,9 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public void deleteItemsByOwnerId(Long ownerId) {
-        List<Long> deleteItems = items.values().stream()
-                .map(Item::getOwnerId)
-                .filter(itemOwnerId -> itemOwnerId.equals(ownerId)).collect(java.util.stream.Collectors.toList());
-        for (Long deleteId : deleteItems) {
-            items.remove(deleteId);
+        List<Item> deleteItems = getItemsByOwnerId(ownerId);
+        for (Item item : deleteItems) {
+            items.remove(item.getId());
         }
     }
 

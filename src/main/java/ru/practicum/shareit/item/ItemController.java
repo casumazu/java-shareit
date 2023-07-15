@@ -31,7 +31,6 @@ public class ItemController {
         return itemService.getItemById(itemId);
     }
 
-    @ResponseBody
     @PostMapping
     public ItemDto create(@Valid @RequestBody ItemDto itemDto, @RequestHeader(OWNER) Long ownerId) {
         log.info("Получен POST-запрос на добавление вещи владельцем {}", ownerId);
@@ -48,7 +47,6 @@ public class ItemController {
         return itemService.getItemsByOwnerId(ownerId);
     }
 
-    @ResponseBody
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
                           @RequestHeader(OWNER) Long ownerId) {
@@ -61,9 +59,9 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}")
-    public ItemDto delete(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
+    public void delete(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
         log.info("Получен DELETE-запрос на удаление вещи {}", itemId);
-        return itemService.deleteItemById(itemId, ownerId);
+        itemService.deleteItemById(itemId, ownerId);
     }
 
     @GetMapping("/search")
