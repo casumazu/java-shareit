@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user.service;
 
-import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
