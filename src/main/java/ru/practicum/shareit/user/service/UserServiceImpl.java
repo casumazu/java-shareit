@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
         }
         if ((userDto.getEmail() != null) && (!userDto.getEmail().equals(userUpdate.getEmail()))) {
             if (repository.findByEmail(userDto.getEmail()).stream()
-                    .noneMatch(u -> u.getEmail().equals(userDto.getEmail()))){
+                    .noneMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
                 userUpdate.setEmail(userDto.getEmail());
             } else {
                 throw new UserExistsException("Пользователь с E-mail=" + userUpdate.getEmail() + " уже существует!");
