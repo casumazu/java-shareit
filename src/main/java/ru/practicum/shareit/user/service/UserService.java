@@ -1,52 +1,19 @@
 package ru.practicum.shareit.user.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
+public interface UserService {
+    List<UserDto> getUsers();
 
-@Service
-public class UserService {
-    private final UserStorage userStorage;
-    private final UserMapper mapper;
-    private final ItemService itemService;
+    User getUserById(Long id);
 
-    @Autowired
-    public UserService(UserStorage userStorage, UserMapper userMapper, ItemService itemService) {
-        this.userStorage = userStorage;
-        this.mapper = userMapper;
-        this.itemService = itemService;
-    }
+    UserDto create(UserDto userDto);
 
-    public List<UserDto> getUsers() {
-        return userStorage.getUsers().stream()
-                .map(mapper::toUserDto)
-                .collect(toList());
-    }
+    UserDto update(UserDto userDto, Long id);
 
-    public UserDto getUserById(Long id) {
-        return mapper.toUserDto(userStorage.getUserById(id));
-    }
-
-    public UserDto create(UserDto userDto) {
-        return mapper.toUserDto(userStorage.create(mapper.toUser(userDto)));
-    }
-
-    public UserDto update(UserDto userDto, Long id) {
-        if (userDto.getId() == null) {
-            userDto.setId(id);
-        }
-        return mapper.toUserDto(userStorage.update(mapper.toUser(userDto)));
-    }
-
-    public void delete(Long userId) {
-        itemService.deleteItemsByOwnerId(userId);
-        userStorage.delete(userId);
-    }
+    void delete(Long userId);
 }
