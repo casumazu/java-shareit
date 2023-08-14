@@ -1,6 +1,11 @@
 package ru.practicum.shareit.booking;
 
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -101,69 +106,79 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDto> getAllBookings(Long userId, String state) {
+    public List<BookingDto> getAllBookings(Long userId, String state, Integer from, Integer size) {
+        LocalDateTime time = LocalDateTime.now();
         getUser(userId);
-        List<Booking> bookings;
+        Page<Booking> bookings;
+        Pageable pageable = getPageable(from, size);
         switch (state) {
             case "ALL":
-                bookings = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByBookerId(userId, pageable);
                 break;
             case "CURRENT":
-                bookings = bookingRepository.findAllByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
-                        LocalDateTime.now(), LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(userId,
+                        time, time, pageable);
                 break;
             case "FUTURE":
-                bookings = bookingRepository.findAllByBooker_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndStartIsAfter(userId, time, pageable);
                 break;
             case "PAST":
-                bookings = bookingRepository.findAllByBooker_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByBookerIdAndEndIsBefore(userId, time, pageable);
                 break;
             case "WAITING":
-                bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, Status.WAITING);
+                bookings = bookingRepository.findByBookerIdAndStatus(userId, Status.WAITING, pageable);
                 break;
             case "REJECTED":
-                bookings = bookingRepository.findAllByBooker_IdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                bookings = bookingRepository.findByBookerIdAndStatus(userId, Status.REJECTED, pageable);
                 break;
             default:
                 throw new UnknownStatusException("Unknown state: " + state);
         }
-        List<BookingDto> bookingDto = bookings.stream()
-                .map(BookingMapper::toBookingDto)
-                .collect(Collectors.toList());
+        List<BookingDto> bookingDto = getBookingsDto(bookings);
         log.info("Результат на запрос всех бронирований пользователем {} {}", userId, bookingDto);
         return bookingDto;
     }
 
+    private Pageable getPageable(Integer from, Integer size) {
+        Sort sortDesc = Sort.by(Sort.Direction.DESC, "start");
+        return PageRequest.of(from / size, size, sortDesc);
+    }
+    private List<BookingDto> getBookingsDto(Page<Booking> bookings) {
+        return bookings
+                .map(BookingMapper::toBookingDto)
+                .toList();
+    }
+
     @Override
-    public List<BookingDto> getAllBookingsForOwner(Long userId, String state) {
+    public List<BookingDto> getAllBookingsForOwner(Long userId, String state, Integer from, Integer size) {
+        LocalDateTime time = LocalDateTime.now();
         getUser(userId);
-        List<Booking> bookings;
+        Page<Booking> bookings;
+        Pageable pageable = getPageable(from, size);
         switch (state) {
             case "ALL":
-                bookings = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(userId);
+                bookings = bookingRepository.findByItem_Owner_Id(userId, pageable);
                 break;
             case "CURRENT":
-                bookings = bookingRepository.findAllByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(
-                        userId, LocalDateTime.now(), LocalDateTime.now());
+                bookings = bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(
+                        userId, time, time, pageable);
                 break;
             case "FUTURE":
-                bookings = bookingRepository.findAllByItem_Owner_IdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByItem_Owner_IdAndStartIsAfter(userId, time, pageable);
                 break;
             case "PAST":
-                bookings = bookingRepository.findAllByItem_Owner_IdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now());
+                bookings = bookingRepository.findByItem_Owner_IdAndEndIsBefore(userId, time, pageable);
                 break;
             case "WAITING":
-                bookings = bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, Status.WAITING);
+                bookings = bookingRepository.findByItem_Owner_IdAndStatus(userId, Status.WAITING, pageable);
                 break;
             case "REJECTED":
-                bookings = bookingRepository.findAllByItem_Owner_IdAndStatusOrderByStartDesc(userId, Status.REJECTED);
+                bookings = bookingRepository.findByItem_Owner_IdAndStatus(userId, Status.REJECTED, pageable);
                 break;
             default:
                 throw new UnknownStatusException("Unknown state: " + state);
         }
-        List<BookingDto> bookingDto = bookings.stream()
-                .map(BookingMapper::toBookingDto)
-                .collect(Collectors.toList());
+        List<BookingDto> bookingDto = getBookingsDto(bookings);
         log.info("Результат на запрос всех бронирований вещей владельцем {} {}", userId, bookingDto);
         return bookingDto;
     }

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import org.springframework.data.domain.PageRequest;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
@@ -15,7 +16,7 @@ public interface ItemService {
 
     List<ItemWithBookingsDto> getItemsByOwnerId(Long ownerId);
 
-    List<ItemDto> getItemsBySearchQuery(String text);
+    List<ItemDto> getItemsBySearchQuery(String text, PageRequest pageRequest);
 
     ItemWithBookingsDto getItemById(Long id, Long itemId);
 

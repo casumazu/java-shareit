@@ -2,6 +2,8 @@ package ru.practicum.shareit.item;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -10,6 +12,8 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @Slf4j
@@ -57,9 +61,12 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> getItemsBySearchQuery(@RequestParam String text) {
+    public List<ItemDto> getItemsBySearchQuery(
+            @RequestParam String text,
+            @Valid @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
+            @Valid @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(20) Integer size) {
         log.info("Получен GET-запрос на поиск вещи с текстом = {}", text);
-        return itemService.getItemsBySearchQuery(text);
+        return itemService.getItemsBySearchQuery(text, PageRequest.of(from / size, size));
     }
 
     @PostMapping("/{itemId}/comment")
