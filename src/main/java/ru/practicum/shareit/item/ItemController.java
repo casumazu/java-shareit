@@ -3,7 +3,9 @@ package ru.practicum.shareit.item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -26,9 +28,9 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable Long itemId) {
+    public ItemWithBookingsDto getItemById(@PathVariable Long itemId,  @RequestHeader(OWNER) Long ownerId) {
         log.info("Получен GET-запрос на получение вещи {}", itemId);
-        return itemService.getItemById(itemId);
+        return itemService.getItemById(itemId, ownerId);
     }
 
     @PostMapping
@@ -36,13 +38,13 @@ public class ItemController {
         log.info("Получен POST-запрос на добавление вещи владельцем {}", ownerId);
         ItemDto newItemDto = null;
         if (userService.getUserById(ownerId) != null) {
-            newItemDto = itemService.createItem(itemDto, ownerId);
+            newItemDto = itemService.create(itemDto, ownerId);
         }
         return newItemDto;
     }
 
     @GetMapping
-    public List<ItemDto> getItemsByOwner(@RequestHeader(OWNER) Long ownerId) {
+    public List<ItemWithBookingsDto> getItemsByOwner(@RequestHeader(OWNER) Long ownerId) {
         log.info("Получен GET-запрос на получение всех вещей владельца {}", ownerId);
         return itemService.getItemsByOwnerId(ownerId);
     }
@@ -51,22 +53,21 @@ public class ItemController {
     public ItemDto update(@RequestBody ItemDto itemDto, @PathVariable Long itemId,
                           @RequestHeader(OWNER) Long ownerId) {
         log.info("Получен PATCH-запрос на обновление вещи {}", itemId);
-        ItemDto newItemDto = null;
-        if (userService.getUserById(ownerId) != null) {
-            newItemDto = itemService.update(itemDto, ownerId, itemId);
-        }
-        return newItemDto;
-    }
-
-    @DeleteMapping("/{itemId}")
-    public void delete(@PathVariable Long itemId, @RequestHeader(OWNER) Long ownerId) {
-        log.info("Получен DELETE-запрос на удаление вещи {}", itemId);
-        itemService.deleteItemById(itemId, ownerId);
+        return itemService.update(itemDto, itemId, ownerId);
     }
 
     @GetMapping("/search")
     public List<ItemDto> getItemsBySearchQuery(@RequestParam String text) {
         log.info("Получен GET-запрос на поиск вещи с текстом = {}", text);
         return itemService.getItemsBySearchQuery(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    CommentDto addComment(@RequestHeader(OWNER) long userId,
+                          @Valid @RequestBody CommentDto commentDto,
+                          @PathVariable long itemId) {
+        log.info("Получен запрос POST на добавление комментария {} к вещи id {}, пользователем id {}",
+                commentDto, itemId, userId);
+        return itemService.createComment(commentDto, itemId, userId);
     }
 }
