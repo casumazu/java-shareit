@@ -68,7 +68,7 @@ public class BookingServiceTest {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
-        BookingDto actual = bookingService.add(1L,bookingInputDto);
+        BookingDto actual = bookingService.add(1L, bookingInputDto);
 
         assertThat(actual.getStart(), equalTo(bookingDto.getStart()));
         assertThat(actual.getEnd(), equalTo(bookingDto.getEnd()));
@@ -83,7 +83,7 @@ public class BookingServiceTest {
     void add_whenBookingInputDtoStartIsAfterEnd_thenValidationException() {
         bookingInputDto.setEnd(start.minusHours(1));
 
-        assertThrows(ValidationException.class, () -> bookingService.add( 1L, bookingInputDto));
+        assertThrows(ValidationException.class, () -> bookingService.add(1L, bookingInputDto));
         verify(bookingRepository, never()).save(any(Booking.class));
     }
 
@@ -92,7 +92,7 @@ public class BookingServiceTest {
     void add_whenBookingInputDtoStartEqualsEnd_thenValidationException() {
         bookingInputDto.setEnd(start);
 
-        assertThrows(ValidationException.class, () -> bookingService.add( 1L, bookingInputDto));
+        assertThrows(ValidationException.class, () -> bookingService.add(1L, bookingInputDto));
         verify(bookingRepository, never()).save(any(Booking.class));
     }
 
@@ -113,7 +113,7 @@ public class BookingServiceTest {
         when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
-        assertThrows(ValidationException.class, () -> bookingService.add( 1L, bookingInputDto));
+        assertThrows(ValidationException.class, () -> bookingService.add(1L, bookingInputDto));
         verify(bookingRepository, never()).save(any(Booking.class));
     }
 
@@ -166,7 +166,7 @@ public class BookingServiceTest {
         when(userRepository.findById(2L)).thenReturn(Optional.of(owner));
         when(bookingRepository.findByItem_Owner_Id(2L, pageable)).thenReturn(bookings);
 
-        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "ALL", 0,20);
+        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "ALL", 0, 20);
 
         assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
     }
@@ -179,7 +179,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(anyLong(),
                 any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class))).thenReturn(bookings);
 
-        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "CURRENT", 0,20);
+        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "CURRENT", 0, 20);
 
         assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
         verify(bookingRepository).findByItem_Owner_IdAndStartIsBeforeAndEndIsAfter(anyLong(),
@@ -194,7 +194,8 @@ public class BookingServiceTest {
         when(bookingRepository.findByItem_Owner_IdAndEndIsBefore(
                 anyLong(), any(LocalDateTime.class), any(Pageable.class))).thenReturn(bookings);
 
-        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "PAST", 0,20);;
+        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "PAST", 0, 20);
+        ;
 
         assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
         verify(bookingRepository).findByItem_Owner_IdAndEndIsBefore(
@@ -209,7 +210,8 @@ public class BookingServiceTest {
         when(bookingRepository.findByItem_Owner_IdAndStartIsAfter(
                 anyLong(), any(LocalDateTime.class), any(Pageable.class))).thenReturn(bookings);
 
-        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "FUTURE", 0,20);;
+        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "FUTURE", 0, 20);
+        ;
 
         assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
         verify(bookingRepository).findByItem_Owner_IdAndStartIsAfter(
@@ -226,7 +228,8 @@ public class BookingServiceTest {
         when(bookingRepository.findByItem_Owner_IdAndStatus(
                 2L, Status.WAITING, pageable)).thenReturn(bookings);
 
-        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "WAITING", 0,20);;
+        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "WAITING", 0, 20);
+        ;
 
         assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
         verify(bookingRepository).findByItem_Owner_IdAndStatus(
@@ -243,7 +246,7 @@ public class BookingServiceTest {
         when(bookingRepository.findByItem_Owner_IdAndStatus(
                 2L, Status.REJECTED, pageable)).thenReturn(bookings);
 
-        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "REJECTED", 0,20);
+        List<BookingDto> actual = bookingService.getAllBookingsForOwner(2L, "REJECTED", 0, 20);
 
         assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
         verify(bookingRepository).findByItem_Owner_IdAndStatus(2L, Status.REJECTED, pageable);

@@ -55,10 +55,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public List<ItemRequestDto> findAll(Long userId, PageRequest pageRequest) {
         getUser(userId);
-        List<ItemRequestDto> requestDtos = repository.findItemRequestsByRequester_IdIsNotOrderByCreated(userId,pageRequest)
+        List<ItemRequestDto> requestDtos = repository.findItemRequestsByRequester_IdIsNotOrderByCreated(userId, pageRequest)
                 .map(ItemRequestMapper::toItemRequestDto)
                 .toList();
-        requestDtos.forEach(itemRequestDto ->  itemRequestDto.setItems(getItemsDtoByRequestId(itemRequestDto.getId())));
+        requestDtos.forEach(itemRequestDto -> itemRequestDto.setItems(getItemsDtoByRequestId(itemRequestDto.getId())));
         log.info("Получен запрос на получение всех запросов от user {}", userId);
         return requestDtos;
     }
@@ -80,7 +80,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
     }
 
-    private ItemRequest getRequest(Long id){
+    private ItemRequest getRequest(Long id) {
         return repository.findById(id).orElseThrow(() -> new RequestNotFoundException("Запрос на вещь не найден"));
     }
 

@@ -46,6 +46,7 @@ public class BookingRepositoryTest {
     private Booking booking;
     Sort sortDesc = Sort.by(Sort.Direction.DESC, "start");
     Pageable pageable = PageRequest.of(0 / 20, 20, sortDesc);
+
     @BeforeEach
     void beforeEach() {
         booker = userRepository.save(new User(1L, "booker", "booker@email.ru"));

@@ -5,7 +5,7 @@ import ru.practicum.shareit.request.model.ItemRequest;
 
 public class ItemRequestMapper {
 
-    public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest){
+    public static ItemRequestDto toItemRequestDto(ItemRequest itemRequest) {
         return new ItemRequestDto(
                 itemRequest.getId(),
                 itemRequest.getDescription(),
@@ -13,7 +13,7 @@ public class ItemRequestMapper {
                 null);
     }
 
-    public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto){
+    public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto) {
         return new ItemRequest(
                 itemRequestDto.getId(),
                 itemRequestDto.getDescription(),
