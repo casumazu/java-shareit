@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +24,6 @@ import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -143,6 +141,7 @@ public class BookingServiceImpl implements BookingService {
         Sort sortDesc = Sort.by(Sort.Direction.DESC, "start");
         return PageRequest.of(from / size, size, sortDesc);
     }
+
     private List<BookingDto> getBookingsDto(Page<Booking> bookings) {
         return bookings
                 .map(BookingMapper::toBookingDto)

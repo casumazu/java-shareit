@@ -49,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDto create(ItemDto itemDto, Long ownerId) {
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(userRepository.findUserById(ownerId));
+        item.setOwner(getUser(ownerId));
         ItemDto itemDtoActual = ItemMapper.toItemDto(itemRepository.save(item));
         log.info("Добавлена новая вещь {}", itemDtoActual);
         return itemDtoActual;

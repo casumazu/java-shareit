@@ -50,5 +50,4 @@ public class ErrorHandler {
     public ErrorResponse handleUnknownStateException(final UnknownStatusException e) {
         return new ErrorResponse(e.getMessage());
     }
-
 }

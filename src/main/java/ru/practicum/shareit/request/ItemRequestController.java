@@ -6,7 +6,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
@@ -48,6 +47,6 @@ public class ItemRequestController {
                                        @Valid @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
                                        @Valid @RequestParam(value = "size", defaultValue = "20")
                                        @Min(1) @Max(100) Integer size) {
-        return itemRequestService.findAll(userId, PageRequest.of(from/size,size));
+        return itemRequestService.findAll(userId, PageRequest.of(from / size, size));
     }
 }
