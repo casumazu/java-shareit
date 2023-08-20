@@ -132,6 +132,7 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new UnknownStatusException("Unknown state: " + state);
         }
+
         List<BookingDto> bookingDto = getBookingsDto(bookings);
         log.info("Результат на запрос всех бронирований пользователем {} {}", userId, bookingDto);
         return bookingDto;
@@ -177,6 +178,7 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new UnknownStatusException("Unknown state: " + state);
         }
+
         List<BookingDto> bookingDto = getBookingsDto(bookings);
         log.info("Результат на запрос всех бронирований вещей владельцем {} {}", userId, bookingDto);
         return bookingDto;
