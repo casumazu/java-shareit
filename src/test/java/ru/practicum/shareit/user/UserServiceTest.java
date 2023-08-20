@@ -44,22 +44,24 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser() {
+    void testUpdateUser() {
+        UserDto createUser = UserDto.builder()
+                .name("create")
+                .email("create@yandex.ru")
+                .build();
+        UserDto createdUser = userService.create(createUser);
+
         updateUser = UserDto.builder()
-                .id(2L)
+                .id(createdUser.getId())
                 .name("update")
-                .email("update@mail.ru")
+                .email("update@yandex.ru")
                 .build();
 
-        userService.create(updateUser);
+        userService.update(updateUser, createdUser.getId());
 
-        updateUser.setName("Bogdan");
-        updateUser.setEmail("bogdan@mail.ru");
-        userService.update(updateUser, 2L);
-
-        User updateUser112 = userService.getUserById(2L);
-        assertEquals(updateUser112.getName(), "Bogdan");
-        assertEquals(updateUser112.getEmail(), "bogdan@mail.ru");
+        User updatedUser = userService.getUserById(createdUser.getId());
+        assertEquals(updatedUser.getName(), "update");
+        assertEquals(updatedUser.getEmail(), "update@yandex.ru");
     }
 
     @Test
