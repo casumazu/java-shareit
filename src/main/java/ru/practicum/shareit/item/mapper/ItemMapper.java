@@ -7,6 +7,8 @@ import ru.practicum.shareit.item.dto.ItemWithBookingsDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 
+import java.util.Optional;
+
 @Component
 public class ItemMapper {
 
@@ -17,7 +19,7 @@ public class ItemMapper {
                 item.getDescription(),
                 item.getAvailable(),
                 item.getOwner(),
-                item.getRequestId() != null ? item.getRequestId() : null);
+                Optional.ofNullable(item.getRequestId()).orElse(null));
     }
 
     public static Item toItem(ItemDto itemDto) {
@@ -27,7 +29,7 @@ public class ItemMapper {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 itemDto.getOwner(),
-                itemDto.getRequestId() != null ? itemDto.getRequestId() : null
+                Optional.ofNullable(itemDto.getRequestId()).orElse(null)
         );
     }
 
@@ -37,7 +39,7 @@ public class ItemMapper {
                 item.getName(),
                 item.getDescription(),
                 item.getAvailable(),
-                item.getRequestId() != null ? item.getRequestId() : null,
+                Optional.ofNullable(item.getRequestId()).orElse(null),
                 null,
                 null,
                 null,
@@ -55,7 +57,7 @@ public class ItemMapper {
 
     public static Comment toComment(CommentDto commentDto) {
         return new Comment(
-                commentDto.getId() != null ? commentDto.getId() : null,
+                Optional.ofNullable(commentDto.getId()).orElse(null),
                 commentDto.getText(),
                 null,
                 null,
