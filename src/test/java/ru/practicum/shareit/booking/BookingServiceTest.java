@@ -254,6 +254,154 @@ public class BookingServiceTest {
     }
 
     @Test
+    void testGetAllBookingsForAllStates() {
+        Long userId = 1L;
+        String state = "ALL";
+        Integer from = 0;
+        Integer size = 20;
+
+        Page<Booking> bookings = new PageImpl<>(List.of(booking));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
+        when(bookingRepository.findByBookerId(userId, pageable)).thenReturn(bookings);
+
+        List<BookingDto> actual = bookingService.getAllBookings(userId, state, from, size);
+
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
+        verify(userRepository).findById(userId);
+        verify(bookingRepository).findByBookerId(userId, pageable);
+    }
+
+
+    @Test
+    void testGetAllBookingsForRejectedState() {
+        Long userId = 1L;
+        String state = "REJECTED";
+        Integer from = 0;
+        Integer size = 20;
+
+        Page<Booking> bookings = new PageImpl<>(List.of(booking));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
+        when(bookingRepository.findByBookerIdAndStatus(userId, Status.REJECTED, pageable)).thenReturn(bookings);
+
+        List<BookingDto> actual = bookingService.getAllBookings(userId, state, from, size);
+
+        assertThat(actual.size(), equalTo(1));
+        assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
+        verify(userRepository).findById(userId);
+        verify(bookingRepository).findByBookerIdAndStatus(userId, Status.REJECTED, pageable);
+    }
+
+    @Test
+    void findAllBookingsStatusCurren() {
+        Page<Booking> bookings = new PageImpl<>(List.of(booking));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStartIsBeforeAndEndIsAfter(anyLong(),
+                any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class))).thenReturn(bookings);
+
+        List<BookingDto> actual = bookingService.getAllBookings(1L, "CURRENT", 0, 20);
+
+        assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
+        verify(bookingRepository).findByBookerIdAndStartIsBeforeAndEndIsAfter(
+                anyLong(), any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
+    }
+
+    @Test
+    void findAllBookingsStatusPast() {
+        Page<Booking> bookings = new PageImpl<>(List.of(booking));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndEndIsBefore(
+                anyLong(), any(LocalDateTime.class), any(Pageable.class))).thenReturn(bookings);
+
+        List<BookingDto> actual = bookingService.getAllBookings(1L, "PAST", 0, 20);
+
+        assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
+        verify(bookingRepository).findByBookerIdAndEndIsBefore(
+                anyLong(), any(LocalDateTime.class), any(Pageable.class));
+    }
+
+    @Test
+    void findAllBookingsStatusFuture() {
+        Page<Booking> bookings = new PageImpl<>(List.of(booking));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStartIsAfter(
+                anyLong(), any(LocalDateTime.class), any(Pageable.class))).thenReturn(bookings);
+
+        List<BookingDto> actual = bookingService.getAllBookings(1L, "FUTURE", 0, 20);
+
+        assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
+        verify(bookingRepository).findByBookerIdAndStartIsAfter(
+                anyLong(), any(LocalDateTime.class), any(Pageable.class));
+    }
+
+    @Test
+    void findAllBookingsStatusWaiting() {
+        booking.setStatus(Status.WAITING);
+        bookingDto.setStatus(Status.WAITING);
+        Page<Booking> bookings = new PageImpl<>(List.of(booking));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStatus(
+                1L, Status.WAITING, pageable)).thenReturn(bookings);
+
+        List<BookingDto> actual = bookingService.getAllBookings(1L, "WAITING", 0, 20);
+
+        assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
+        verify(bookingRepository).findByBookerIdAndStatus(
+                1L, Status.WAITING, pageable);
+    }
+
+    @Test
+    void testApproveBookingByNonOwner() {
+        Long userId = 1L;
+        Long bookingId = 1L;
+        Boolean approved = true;
+
+        User booker = new User(userId, "NonOwner", "nonowner@email.ru");
+
+        Booking bookingWithWaitingStatus = new Booking(id, start, end, item, booker, Status.WAITING);
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(bookingWithWaitingStatus));
+
+        BookingNotFoundException exception = assertThrows(BookingNotFoundException.class,
+                () -> bookingService.approve(userId, bookingId, approved));
+
+        assertEquals("Подтвердить бронирование может только владелец вещи", exception.getMessage());
+        verify(bookingRepository).findById(bookingId);
+        verify(bookingRepository, never()).save(any(Booking.class));
+    }
+
+    @Test
+    void approveBookingApprovedTrueBookingNotFoundException() {
+        when(bookingRepository.findById(id)).thenReturn(Optional.of(booking));
+
+        assertThrows(BookingNotFoundException.class, () ->
+                bookingService.approve(1L, id, true));
+        verify(bookingRepository, never()).save(any(Booking.class));
+    }
+
+    @Test
+    void approveBookingApprovedTrueStatusApproved() {
+        when(bookingRepository.findById(id)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(booking)).thenReturn(booking);
+
+        BookingDto actual = bookingService.approve(2L, id, true);
+
+        assertThat(actual.getStatus(), equalTo(Status.APPROVED));
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void approveBookingApprovedFalseStatusRejected() {
+        when(bookingRepository.findById(id)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(booking)).thenReturn(booking);
+
+        BookingDto actual = bookingService.approve(2L, id, false);
+
+        assertThat(actual.getStatus(), equalTo(Status.REJECTED));
+        verify(bookingRepository).save(booking);
+    }
+
+
+    @Test
     void testGetAllBookingsWithUnknownStatus() {
         Long userId = 1L;
         String state = "UNKNOWN";

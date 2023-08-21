@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -72,5 +73,13 @@ public class ItemRequestServiceTest {
         ItemRequestDto returnItemRequestDto = itemRequestService.findById(
                 firstUserDto.getId(), newItemRequestDto.getId());
         assertThat(returnItemRequestDto.getDescription(), equalTo(itemRequestDto.getDescription()));
+    }
+
+
+    @Test
+    void findAllUserNotFoundException() {
+        PageRequest pageRequest = PageRequest.of(0 / 20, 20);
+
+        assertThrows(UserNotFoundException.class, () -> itemRequestService.findAll(2L, pageRequest));
     }
 }
