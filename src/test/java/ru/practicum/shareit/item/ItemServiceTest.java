@@ -30,7 +30,7 @@ import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -167,7 +167,7 @@ public class ItemServiceTest {
     }
 
     @Test
-    void addComment_whenUserDidNotBookingItem_thenConstraintViolationCommentException() {
+    void addCommentUserDidNotBookingItemValidationException() {
         when(bookingRepository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(anyLong(),
                 eq(3L), any(LocalDateTime.class), eq(Status.APPROVED))).thenReturn(null);
 
@@ -176,7 +176,7 @@ public class ItemServiceTest {
     }
 
     @Test
-    void findById_whenUserIdNotEqualsItemOwnerId_thenReturnedItemFullDtoWithoutInfoAboutBookings() {
+    void findById_UserIdNotEqualsItemOwnerIdItemFullDtoWithoutInfoAboutBookings() {
         when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
         when(commentRepository.findByItemId(item.getId())).thenReturn(List.of(comment));
 
@@ -186,5 +186,69 @@ public class ItemServiceTest {
         assertThat(actual.getComments(), equalTo(itemFullDto.getComments()));
         assertThat(actual.getLastBooking(), equalTo(null));
         assertThat(actual.getNextBooking(), equalTo(null));
+    }
+
+    @Test
+    void testGetItemsByOwnerId() {
+        when(itemRepository.findAllByOwnerId(owner.getId())).thenReturn(List.of(item));
+        when(bookingRepository.findFirstByItem_IdAndStartBeforeOrderByEndDesc(anyLong(), any(LocalDateTime.class)))
+                .thenReturn(lastBooking);
+        when(bookingRepository.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(
+                anyLong(), any(LocalDateTime.class), eq(Status.APPROVED))).thenReturn(nextBooking);
+        when(commentRepository.findByItemId(item.getId())).thenReturn(List.of(comment));
+
+        List<ItemWithBookingsDto> items = itemService.getItemsByOwnerId(owner.getId());
+
+        assertEquals(1, items.size());
+        assertEquals(itemDto.getName(), items.get(0).getName());
+        assertEquals(itemFullDto.getLastBooking(), items.get(0).getLastBooking());
+        assertEquals(itemFullDto.getNextBooking(), items.get(0).getNextBooking());
+        assertEquals(itemFullDto.getComments(), items.get(0).getComments());
+    }
+
+    @Test
+    void testGetItemsBySearchQueryWithBlankText() {
+        List<ItemDto> result = itemService.getItemsBySearchQuery("", PageRequest.of(0, 20));
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testCreateCommentWithoutBooking() {
+        when(bookingRepository.findFirstByItem_IdAndBooker_IdAndEndIsBeforeAndStatus(
+                anyLong(), anyLong(), any(LocalDateTime.class), eq(Status.APPROVED))).thenReturn(null);
+
+        assertThrows(ValidationException.class, () ->
+                itemService.createComment(commentDto, item.getId(), 3L));
+    }
+
+    @Test
+    void testGetItemByIdForOtherUser() {
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(commentRepository.findByItemId(item.getId())).thenReturn(List.of(comment));
+
+        ItemWithBookingsDto result = itemService.getItemById(item.getId(), 3L);
+
+        assertEquals(itemDto.getName(), result.getName());
+        assertNull(result.getLastBooking());
+        assertNull(result.getNextBooking());
+        assertEquals(itemFullDto.getComments(), result.getComments());
+    }
+
+    @Test
+    void testGetItemByIdForOwner() {
+        when(itemRepository.findById(item.getId())).thenReturn(Optional.of(item));
+        when(bookingRepository.findFirstByItem_IdAndStartBeforeOrderByEndDesc(
+                anyLong(), any(LocalDateTime.class))).thenReturn(lastBooking);
+        when(bookingRepository.findFirstByItem_IdAndStartAfterAndStatusOrderByStartAsc(
+                anyLong(), any(LocalDateTime.class), eq(Status.APPROVED))).thenReturn(nextBooking);
+        when(commentRepository.findByItemId(item.getId())).thenReturn(List.of(comment));
+
+        ItemWithBookingsDto result = itemService.getItemById(item.getId(), owner.getId());
+
+        assertEquals(itemFullDto.getName(), result.getName());
+        assertEquals(itemFullDto.getLastBooking(), result.getLastBooking());
+        assertEquals(itemFullDto.getNextBooking(), result.getNextBooking());
+        assertEquals(itemFullDto.getComments(), result.getComments());
     }
 }

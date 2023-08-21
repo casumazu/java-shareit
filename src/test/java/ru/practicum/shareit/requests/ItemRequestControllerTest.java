@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -95,5 +96,21 @@ public class ItemRequestControllerTest {
 
         verify(itemRequestService).findAll(1L, pageRequest);
         assertThat(mapper.writeValueAsString(expected), equalTo(result));
+    }
+
+    @SneakyThrows
+    @Test
+    void getRequestById() {
+        ItemRequestDto expected = new ItemRequestDto(1L, "ItemRequest description",
+                LocalDateTime.of(2022, 1, 2, 3, 4, 5), null);
+
+        when(itemRequestService.findById(1L, 1L)).thenReturn(expected);
+
+        mvc.perform(get("/requests/{requestId}", 1)
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expected)));
+
+        verify(itemRequestService).findById(1L, 1L);
     }
 }

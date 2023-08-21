@@ -18,6 +18,7 @@ import ru.practicum.shareit.item.service.ItemServiceImpl;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -130,6 +131,21 @@ public class ItemControllerTest {
 
         assertEquals(objectMapper.writeValueAsString(List.of(itemDto)), result);
         verify(itemService).getItemsBySearchQuery("description", pageRequest);
+    }
+
+
+    @Test
+    void getItemsByOwner() throws Exception {
+        List<ItemWithBookingsDto> items = Arrays.asList(itemFullDto, itemFullDto);
+
+        when(itemService.getItemsByOwnerId(owner.getId())).thenReturn(items);
+
+        mvc.perform(get("/items")
+                        .header("X-Sharer-User-Id", owner.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(items)));
+
+        verify(itemService).getItemsByOwnerId(owner.getId());
     }
 
     @Test

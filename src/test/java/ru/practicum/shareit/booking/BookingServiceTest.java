@@ -12,6 +12,7 @@ import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.BookingNotFoundException;
+import ru.practicum.shareit.exception.UnknownStatusException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -28,7 +29,7 @@ import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -250,5 +251,29 @@ public class BookingServiceTest {
 
         assertThat(actual.get(0).toString(), equalTo(bookingDto.toString()));
         verify(bookingRepository).findByItem_Owner_IdAndStatus(2L, Status.REJECTED, pageable);
+    }
+
+    @Test
+    void testGetAllBookingsWithUnknownStatus() {
+        Long userId = 1L;
+        String state = "UNKNOWN";
+        Integer from = 0;
+        Integer size = 20;
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
+        assertThrows(UnknownStatusException.class,
+                () -> bookingService.getAllBookings(userId, state, from, size));
+        verify(userRepository).findById(userId);
+    }
+
+
+    @Test
+    void testApproveBookingNotFound() {
+        Long userId = 1L;
+        Long bookingId = 1L;
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThrows(BookingNotFoundException.class,
+                () -> bookingService.approve(userId, bookingId, true));
+
+        verify(bookingRepository).findById(bookingId);
     }
 }

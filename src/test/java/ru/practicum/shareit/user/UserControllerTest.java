@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.exception.UserExistsException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -16,13 +17,14 @@ import ru.practicum.shareit.user.service.UserServiceImpl;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = UserController.class)
 public class UserControllerTest {
@@ -99,5 +101,57 @@ public class UserControllerTest {
 
         mvc.perform(get("/users/{id}", 999L))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateUser() throws Exception {
+        when(userService.update(userDto, userDto.getId())).thenReturn(userDto);
+
+        mvc.perform(patch("/users/{id}", userDto.getId())
+                        .content(mapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(userDto.getId()), Long.class))
+                .andExpect(jsonPath("$.name", is(userDto.getName())))
+                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
+
+        verify(userService).update(userDto, userDto.getId());
+    }
+
+    @Test
+    void getUsers() throws Exception {
+        UserDto user1 = new UserDto(1L, "User1", "user1@example.com");
+        UserDto user2 = new UserDto(2L, "User2", "user2@example.com");
+        List<UserDto> users = Arrays.asList(user1, user2);
+
+        when(userService.getUsers()).thenReturn(users);
+
+        mvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(users)));
+    }
+
+    @Test
+    void updateUserWithDuplicateEmail() throws Exception {
+        when(userService.update(userDto, userDto.getId())).thenThrow(UserExistsException.class);
+
+        mvc.perform(patch("/users/{id}", userDto.getId())
+                        .content(mapper.writeValueAsString(userDto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict()); // or any appropriate status code for duplicate entry
+
+        verify(userService).update(userDto, userDto.getId());
+    }
+
+    @Test
+    void deleteUser() throws Exception {
+        mvc.perform(delete("/users/{id}", userDto.getId()))
+                .andExpect(status().isOk());
+
+        verify(userService).delete(userDto.getId());
     }
 }
