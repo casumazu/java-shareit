@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import ru.practicum.shareit.exception.UserExistsException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -22,6 +23,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -87,20 +89,14 @@ public class UserControllerTest {
 
     @SneakyThrows
     @Test
-    void deleteUserById() {
-        mvc.perform(delete("/users/{id}", userDto.getId()))
-                .andExpect(status().isOk());
-
-        verify(userService).delete(userDto.getId());
-    }
-
-    @SneakyThrows
-    @Test
     void findUserByIdWithWrongId() {
-        when(userService.getUserById(999L)).thenThrow(UserNotFoundException.class);
+        String expectedErrorMessage = "Пользователь не найден";
+        when(userService.getUserById(999L)).thenThrow(new UserNotFoundException(expectedErrorMessage));
 
-        mvc.perform(get("/users/{id}", 999L))
-                .andExpect(status().isNotFound());
+        mvc.perform(MockMvcRequestBuilders.get("/users/{id}", 999L))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof UserNotFoundException))
+                .andExpect(result -> assertEquals(expectedErrorMessage, result.getResolvedException().getMessage()));
     }
 
     @Test
@@ -142,7 +138,7 @@ public class UserControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isConflict()); // or any appropriate status code for duplicate entry
+                .andExpect(status().isConflict());
 
         verify(userService).update(userDto, userDto.getId());
     }

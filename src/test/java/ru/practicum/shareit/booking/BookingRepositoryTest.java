@@ -12,6 +12,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.BookingNotFoundException;
+import ru.practicum.shareit.exception.UnknownStatusException;
 import ru.practicum.shareit.item.model.Item;
 
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -23,6 +25,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @DataJpaTest
@@ -100,6 +103,33 @@ public class BookingRepositoryTest {
         assertThat(actual.size(), equalTo(1));
         assertThat(actual.get(0).getBooker(), equalTo(booking.getBooker()));
         assertThat(actual.get(0).getStatus(), equalTo(booking.getStatus()));
+    }
+
+    @Test
+    void testGetAllBookingsWithUnknownStateThrowsException() {
+        User user = userRepository.save(new User(1L, "user", "user@email.ru"));
+
+        BookingServiceImpl bookingService = new BookingServiceImpl(userRepository, itemRepository, bookingRepository);
+
+        assertThrows(UnknownStatusException.class, () -> {
+            bookingService.getAllBookings(user.getId(), "UNKNOWN_STATE", 0, 10);
+        });
+    }
+
+    @Test
+    void testGetBookingByIdWithInvalidUserThrowsException() {
+        User user1 = userRepository.save(new User(1L, "user1", "user1@email.ru"));
+        User user2 = userRepository.save(new User(2L, "user2", "user2@email.ru"));
+
+        Item item = itemRepository.save(new Item(1L, "item", "desc", true, user1, null));
+
+        Booking booking = bookingRepository.save(new Booking(1L, LocalDateTime.now(), LocalDateTime.now().plusDays(1), item, user1, Status.WAITING));
+
+        BookingServiceImpl bookingService = new BookingServiceImpl(userRepository, itemRepository, bookingRepository);
+
+        assertThrows(BookingNotFoundException.class, () -> {
+            bookingService.getBookingById(user2.getId(), booking.getId());
+        });
     }
 
     @Test

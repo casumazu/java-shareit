@@ -138,9 +138,9 @@ public class BookingServiceImpl implements BookingService {
         return bookingDto;
     }
 
-    private Pageable getPageable(Integer from, Integer size) {
+    private Pageable getPageable(int pageNumber, int pageSize) {
         Sort sortDesc = Sort.by(Sort.Direction.DESC, "start");
-        return PageRequest.of(from / size, size, sortDesc);
+        return PageRequest.of(pageNumber, pageSize, sortDesc);
     }
 
     private List<BookingDto> getBookingsDto(Page<Booking> bookings) {
