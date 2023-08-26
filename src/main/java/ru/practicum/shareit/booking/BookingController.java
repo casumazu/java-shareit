@@ -2,16 +2,20 @@ package ru.practicum.shareit.booking;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @Slf4j
 @RestController
+@Validated
 @RequestMapping("/bookings")
 public class BookingController {
 
@@ -48,17 +52,21 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDto> getBookings(@RequestParam(name = "state", defaultValue = "ALL") String state,
-                                        @RequestHeader(OWNER) Long userId) {
+                                        @RequestHeader(OWNER) Long userId,
+                                        @Valid @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
+                                        @Valid @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(100) Integer size) {
         log.info("Получен GET-запрос '/bookings' на получение списка всех бронирований " +
                 "пользователя с ID={} с параметром STATE={}", userId, state);
-        return service.getAllBookings(userId, state);
+        return service.getAllBookings(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getBookingsOwner(@RequestParam(name = "state", defaultValue = "ALL") String state,
-                                             @RequestHeader(OWNER) Long userId) {
+                                             @RequestHeader(OWNER) Long userId,
+                                             @Valid @RequestParam(value = "from", defaultValue = "0") @Min(0) Integer from,
+                                             @Valid @RequestParam(value = "size", defaultValue = "20") @Min(1) @Max(100) Integer size) {
         log.info("Получен GET-запрос '/bookings/owner' на получение списка всех бронирований " +
                 "вещей пользователя с ID={} с параметром STATE={}", userId, state);
-        return service.getAllBookingsForOwner(userId, state);
+        return service.getAllBookingsForOwner(userId, state, from, size);
     }
 }

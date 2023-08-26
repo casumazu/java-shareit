@@ -23,6 +23,12 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleRequestNotFoundException(final RequestNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleBookingNotFoundException(final BookingNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
@@ -44,5 +50,4 @@ public class ErrorHandler {
     public ErrorResponse handleUnknownStateException(final UnknownStatusException e) {
         return new ErrorResponse(e.getMessage());
     }
-
 }

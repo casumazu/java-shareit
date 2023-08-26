@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
@@ -48,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDto create(ItemDto itemDto, Long ownerId) {
         Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(userRepository.findUserById(ownerId));
+        item.setOwner(getUser(ownerId));
         ItemDto itemDtoActual = ItemMapper.toItemDto(itemRepository.save(item));
         log.info("Добавлена новая вещь {}", itemDtoActual);
         return itemDtoActual;
@@ -82,11 +83,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItemsBySearchQuery(String text) {
+    public List<ItemDto> getItemsBySearchQuery(String text, PageRequest pageRequest) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        List<ItemDto> searchResult = itemRepository.searchByQuery(text).stream()
+        List<ItemDto> searchResult = itemRepository.search(text, pageRequest).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
         log.info("Поиск вещи по тексту ' {} '", text);
