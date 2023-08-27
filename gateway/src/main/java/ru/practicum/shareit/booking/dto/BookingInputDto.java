@@ -1,7 +1,8 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;

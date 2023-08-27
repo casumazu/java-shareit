@@ -32,7 +32,7 @@ public class ItemRequestController {
 
     @GetMapping("/{requestId}")
     public ResponseEntity<Object> findById(@PathVariable("requestId") Long itemRequestId,
-                                           @RequestHeader(HEADER_USER_ID) Long userId) {
+                                                     @RequestHeader(HEADER_USER_ID) Long userId) {
         log.info("Получен GET запрос на просмотр данных о запросе id {}, отправлен пользователем id {}",
                 itemRequestId, userId);
         return itemRequestClient.getItemRequestById(userId, itemRequestId);
@@ -50,9 +50,10 @@ public class ItemRequestController {
                                           @Valid @RequestParam(value = "from", defaultValue = "0")
                                           @Min(0) Integer from,
                                           @Valid @RequestParam(value = "size", defaultValue = "20")
-                                          @Min(1) @Max(100) Integer size) {
+                                              @Min(1) @Max(100) Integer size) {
         log.info("Получен GET запрос на просмотр списка всех запросов созданных другими пользователями," +
                 " отправлен пользователем id {}", userId);
         return itemRequestClient.getAllItemRequests(userId, from, size);
     }
 }
+

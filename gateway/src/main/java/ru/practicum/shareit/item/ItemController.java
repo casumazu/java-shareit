@@ -27,8 +27,8 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<Object> findAllByOwner(@RequestHeader(HEADER_USER_ID) Long ownerId,
-                                                 @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                                 @RequestParam(required = false) Integer size) {
+                                                  @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                  @RequestParam(required = false) Integer size) {
         log.info("Получен GET запрос на просмотр вещей, отправлен пользователем id {}", ownerId);
         return itemClient.getItemsByOwner(ownerId, from, size);
     }
@@ -42,7 +42,7 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ResponseEntity<Object> findById(@RequestHeader(HEADER_USER_ID) Long userId,
-                                           @PathVariable Long itemId) {
+                                              @PathVariable Long itemId) {
         log.info("Получен GET запрос на просмотр вещи id {}, отправлен пользователем id {}", itemId, userId);
         return itemClient.getItemById(userId, itemId);
     }
@@ -60,7 +60,7 @@ public class ItemController {
                                               @Valid @RequestParam(value = "from", defaultValue = "0")
                                               @Min(0) Integer from,
                                               @Valid @RequestParam(value = "size", defaultValue = "20")
-                                              @Min(1) @Max(100) Integer size) {
+                                                  @Min(1) @Max(100) Integer size) {
         log.info("Получен GET запрос на поиск вещи по {}", text);
         return itemClient.searchItems(text, from, size);
     }
