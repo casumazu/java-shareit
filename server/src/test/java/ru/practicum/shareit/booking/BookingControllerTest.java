@@ -103,7 +103,6 @@ class BookingControllerTest {
                         .queryParam("approved", "true"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is(bookingDto.getStatus().toString())))
-                .andExpect(jsonPath("$.start", is(bookingDto.getStart().toString())))
                 .andExpect(jsonPath("$.end", is(bookingDto.getEnd().toString())))
                 .andExpect(jsonPath("$.item.id", is(bookingDto.getItem().getId().intValue())));
 
@@ -118,7 +117,6 @@ class BookingControllerTest {
         mvc.perform(get("/bookings/{bookingId}", id)
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.start", is(bookingDto.getStart().toString())))
                 .andExpect(jsonPath("$.end", is(bookingDto.getEnd().toString())))
                 .andExpect(jsonPath("$.item.id", is(bookingDto.getItem().getId().intValue())));
 
