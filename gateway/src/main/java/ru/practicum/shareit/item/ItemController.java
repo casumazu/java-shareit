@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,6 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.PositiveOrZero;
 
 import static ru.practicum.shareit.booking.BookingController.HEADER_USER_ID;
-
 
 @Controller
 @RequestMapping(path = "/items")
@@ -56,14 +56,13 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Object> searchItems(@RequestHeader(HEADER_USER_ID) Long userId,
-                                              @RequestParam String text,
+    public ResponseEntity<Object> searchItems(@RequestParam String text,
                                               @Valid @RequestParam(value = "from", defaultValue = "0")
                                               @Min(0) Integer from,
                                               @Valid @RequestParam(value = "size", defaultValue = "20")
                                               @Min(1) @Max(100) Integer size) {
         log.info("Получен GET запрос на поиск вещи по {}", text);
-        return itemClient.searchItems(userId, text, from, size);
+        return itemClient.searchItems(text, from, size);
     }
 
     @ResponseBody

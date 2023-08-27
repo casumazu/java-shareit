@@ -11,8 +11,6 @@ import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
-import java.util.Map;
-
 @Service
 public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
@@ -47,13 +45,12 @@ public class ItemClient extends BaseClient {
         return patch("/" + itemId, userId, itemDto);
     }
 
-    public ResponseEntity<Object> searchItems(Long userId, String text, Integer from, Integer size) {
-        Map<String, Object> parameters = Map.of(
-                "text", text,
-                "from", from,
-                "size", size
-        );
-        return get("/search?text={text}&from={from}&size={size}", userId, parameters);
+    public ResponseEntity<Object> searchItems(String text, Integer from, Integer size) {
+        String path = "/search?text=" + text + "&from=" + from;
+        if (size != null) {
+            path += "&size=" + size;
+        }
+        return get(path);
     }
 
     public ResponseEntity<Object> createComment(CommentDto commentDto, Long itemId, Long userId) {
