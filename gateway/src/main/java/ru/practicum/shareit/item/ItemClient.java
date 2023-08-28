@@ -15,7 +15,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
 
-    @Autowired
     public ItemClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder

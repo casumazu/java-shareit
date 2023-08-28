@@ -60,7 +60,7 @@ public class ItemServiceImpl implements ItemService {
         Item item = getItem(itemId);
 
         if (!Objects.equals(item.getOwner().getId(), userId)) {
-            log.info("Пользователь {} не является владельцем вещи {}", userId, itemDto);
+            log.warn("Пользователь {} не является владельцем вещи {}", userId, itemDto);
             throw new UserNotFoundException("Пользователь не является владельцем вещи");
         }
         Optional.ofNullable(itemDto.getName()).ifPresent(item::setName);
@@ -141,7 +141,7 @@ public class ItemServiceImpl implements ItemService {
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long userId) {
         Booking booking = getBookingWithUserBookedItem(itemId, userId);
         if (booking == null) {
-            log.info("Ошибка добавления отзыва, пользователь ID{} не арендовал данную вещь {}", userId, itemId);
+            log.error("Ошибка добавления отзыва, пользователь ID{} не арендовал данную вещь {}", userId, itemId);
             throw new ValidationException("Ошибка добавления отзыва, пользователь не брал в аренду данную вещь");
         }
         Comment comment = ItemMapper.toComment(commentDto);

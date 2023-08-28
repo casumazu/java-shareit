@@ -46,7 +46,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto add(Long userId, BookingInputDto bookingInputDto) {
         if (bookingInputDto.getStart().equals(bookingInputDto.getEnd()) ||
                 bookingInputDto.getStart().isAfter(bookingInputDto.getEnd())) {
-            log.info("Ошибка в выборе даты бронирования, дата старта {}, дата окончания {}",
+            log.error("Ошибка в выборе даты бронирования, дата старта {}, дата окончания {}",
                     bookingInputDto.getStart(), bookingInputDto.getEnd());
             throw new ValidationException("Бронирование недоступно, ошибка в выборе даты бронирования");
         }
@@ -56,13 +56,13 @@ public class BookingServiceImpl implements BookingService {
         booking.setBooker(getUser(userId));
 
         if (userId.equals(booking.getItem().getOwner().getId())) {
-            log.info("Пользователь {} является владельцем вещи {} и не может ее забронировать",
+            log.warn("Пользователь {} является владельцем вещи {} и не может ее забронировать",
                     userId, booking.getItem());
             throw new BookingNotFoundException("Недоступна для бронирования владельцем");
         }
 
         if (!booking.getItem().getAvailable()) {
-            log.info("Вещь {} недоступна для бронирования", booking.getItem());
+            log.warn("Вещь {} недоступна для бронирования", booking.getItem());
             throw new ValidationException("Вещь недоступна для бронирования");
         }
 
@@ -190,7 +190,7 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new BookingNotFoundException("Бронирование не найдено"));
         if (!booking.getBooker().getId().equals(userId) &&
                 !booking.getItem().getOwner().getId().equals(userId)) {
-            log.info("Просмотр бронирования не доступен пользователю {}", userId);
+            log.error("Просмотр бронирования не доступен пользователю {}", userId);
             throw new BookingNotFoundException("Пользователь не является автором бронирования, либо владельцем вещи");
         }
         return booking;
